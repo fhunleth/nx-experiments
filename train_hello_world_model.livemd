@@ -8,6 +8,14 @@ WARNING: This is a work in progress!
 
 When it's complete, it will demonstrate the process of training a simple model for TensorFlow Lite for Microcontrollers in Elixir.
 
+To do:
+
+* Graphs showing training and validation loss and error. Not sure how to get these yet...
+* Generate TensorFlow Lite model. Not supported by Axon yet.
+* Model quantization. Not supported yet.
+* Demo that uses the model
+* Simplify plotting code. It works, but really seems like it could be improved.
+
 ## Setup
 
 This notebook requires Axon.
