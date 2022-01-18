@@ -22,7 +22,6 @@ Mix.install([
 ])
 
 alias VegaLite, as: Vl
-require Axon
 
 # Set the default options for this notebook
 Nx.Defn.default_options(compiler: EXLA)
@@ -137,29 +136,14 @@ model =
 ```
 
 ```elixir
-log_metrics = fn state ->
-  loss = "Loss: #{:io_lib.format('~.5f', [Nx.to_number(state.step_state.loss)])}"
-
-  metrics =
-    state.metrics
-    |> Enum.map(fn {k, v} -> "#{k}: #{:io_lib.format('~.5f', [Nx.to_number(v)])}" end)
-    |> Enum.join(" ")
-
-  IO.write(
-    "\rEpoch: #{Nx.to_number(state.epoch)}, Batch: #{Nx.to_number(state.iteration)}, #{loss} #{metrics}"
-  )
-
-  {:continue, state}
-end
-
 data = [{training_samples, training_targets}]
+validation_data = [{validation_samples, validation_targets}]
 
-# TBD: What do I do with the validation samples???
 model_state =
   model
   |> Axon.Loop.trainer(:mean_squared_error, Axon.Optimizers.adam(0.005))
   |> Axon.Loop.metric(:mean_absolute_error)
-  |> Axon.Loop.handle(:iteration_completed, log_metrics)
+  |> Axon.Loop.validate(model, validation_data)
   |> Axon.Loop.run(data, epochs: 500, iterations: 100)
 ```
 
@@ -174,6 +158,7 @@ TBD
 To get more insight into what is happening, let's check its predictions against the test dataset we set aside earlier:
 
 ```elixir
+require Axon
 result = Axon.predict(model, model_state, testing_samples)
 ```
 
@@ -218,13 +203,14 @@ We'll now train and save the new model.
 
 ```elixir
 data = [{training_samples, training_targets}]
+validation_data = [{validation_samples, validation_targets}]
 
 model_state =
   model
   |> Axon.Loop.trainer(:mean_squared_error, Axon.Optimizers.adam(0.005))
   |> Axon.Loop.metric(:mean_absolute_error)
-  |> Axon.Loop.handle(:iteration_completed, log_metrics)
-  |> Axon.Loop.run(data, epochs: 500)
+  |> Axon.Loop.validate(model, validation_data)
+  |> Axon.Loop.run(data, epochs: 500, interations: 100)
 ```
 
 ### Plot metrics
